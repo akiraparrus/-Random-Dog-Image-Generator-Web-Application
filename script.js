@@ -1,30 +1,44 @@
 // Function to fetch and display a new dog image
 async function getNewDog() {
     const container = document.getElementById('dogImageContainer');
-    
-    // Show loading state
-    container.innerHTML = '<p>Fetching a cute dog... 🐾</p>';
+    const loadingText = document.createElement('div');
+    loadingText.className = 'loading-text';
+    loadingText.textContent = 'Fetching a cute dog... 🐾';
+
+    // Clear previous content and show loading state
+    container.innerHTML = '';
+    container.appendChild(loadingText);
     
     try {
         const response = await fetch('https://dog.ceo/api/breeds/image/random');
+        if (!response.ok) throw new Error('Network response was not ok');
+        
         const data = await response.json();
         
         if (data.status === 'success') {
             // Create new image element
             const img = new Image();
-            img.src = data.message;
-            img.className = 'dog-image';
-            img.alt = 'Random Dog';
             
-            // Clear container and add new image
-            container.innerHTML = '';
-            container.appendChild(img);
+            // Set up load and error handlers before setting src
+            img.onload = () => {
+                container.innerHTML = '';
+                img.className = 'dog-image';
+                container.appendChild(img);
+            };
+            
+            img.onerror = () => {
+                container.innerHTML = '<div class="loading-text">Sorry, failed to load the image. Click the button to try again! 🐾</div>';
+            };
+            
+            // Start loading the image
+            img.src = data.message;
+            img.alt = 'Random Dog';
         } else {
-            container.innerHTML = '<p>Oops! Failed to fetch a dog image. Please try again!</p>';
+            throw new Error('API returned unsuccessful status');
         }
     } catch (error) {
-        container.innerHTML = '<p>Oops! Something went wrong. Please try again!</p>';
         console.error('Error:', error);
+        container.innerHTML = '<div class="loading-text">Oops! Something went wrong. Click the button to try again! 🐾</div>';
     }
 }
 
