@@ -29,6 +29,7 @@ h1 {
     padding: 10px;
     border-radius: 10px;
     background-color: #f8f9fa;
+    transition: all 0.3s ease;
 }
 
 .dog-image {
@@ -36,9 +37,11 @@ h1 {
     height: auto;
     border-radius: 10px;
     box-shadow: 0 0 15px rgba(0,0,0,0.1);
+    opacity: 0;
+    animation: fadeIn 0.5s ease-in forwards;
 }
 
-.button {
+.button, .retry-button {
     background-color: #1a73e8;
     color: white;
     padding: 12px 24px;
@@ -47,15 +50,16 @@ h1 {
     cursor: pointer;
     font-size: 16px;
     transition: all 0.3s ease;
+    margin: 10px;
 }
 
-.button:hover {
+.button:hover, .retry-button:hover {
     background-color: #1557b0;
     transform: translateY(-2px);
     box-shadow: 0 2px 5px rgba(0,0,0,0.2);
 }
 
-.button:active {
+.button:active, .retry-button:active {
     transform: translateY(0);
 }
 
@@ -71,8 +75,36 @@ h1 {
     animation: pulse 1.5s infinite;
 }
 
+.error-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+}
+
 @keyframes pulse {
     0% { opacity: 0.6; }
     50% { opacity: 1; }
     100% { opacity: 0.6; }
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@media (max-width: 600px) {
+    .container {
+        margin: 10px;
+        padding: 15px;
+    }
+    
+    h1 {
+        font-size: 24px;
+    }
+    
+    .button, .retry-button {
+        padding: 10px 20px;
+        font-size: 14px;
+    }
 }

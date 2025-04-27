@@ -1,46 +1,50 @@
 // Function to fetch and display a new dog image
 async function getNewDog() {
     const container = document.getElementById('dogImageContainer');
-    const loadingText = document.createElement('div');
-    loadingText.className = 'loading-text';
-    loadingText.textContent = 'Fetching a cute dog... 🐾';
-
-    // Clear previous content and show loading state
-    container.innerHTML = '';
-    container.appendChild(loadingText);
+    
+    // Show loading state
+    container.innerHTML = '<div class="loading-text">Fetching a cute dog... 🐾</div>';
     
     try {
-        const response = await fetch('https://dog.ceo/api/breeds/image/random');
-        if (!response.ok) throw new Error('Network response was not ok');
-        
+        // Add cache-busting parameter to prevent caching issues
+        const response = await fetch('https://dog.ceo/api/breeds/image/random?' + new Date().getTime());
         const data = await response.json();
         
         if (data.status === 'success') {
-            // Create new image element
+            // Pre-load the image
             const img = new Image();
             
-            // Set up load and error handlers before setting src
-            img.onload = () => {
-                container.innerHTML = '';
+            // Promise to handle image loading
+            const loadImage = new Promise((resolve, reject) => {
+                img.onload = resolve;
+                img.onerror = reject;
+                img.src = data.message;
+                img.alt = 'Random Dog';
                 img.className = 'dog-image';
-                container.appendChild(img);
-            };
-            
-            img.onerror = () => {
-                container.innerHTML = '<div class="loading-text">Sorry, failed to load the image. Click the button to try again! 🐾</div>';
-            };
-            
-            // Start loading the image
-            img.src = data.message;
-            img.alt = 'Random Dog';
+            });
+
+            // Wait for image to load with timeout
+            await Promise.race([
+                loadImage,
+                new Promise((_, reject) => setTimeout(() => reject(new Error('Image load timeout')), 10000))
+            ]);
+
+            // Image loaded successfully
+            container.innerHTML = '';
+            container.appendChild(img);
         } else {
-            throw new Error('API returned unsuccessful status');
+            throw new Error('Failed to get dog image');
         }
     } catch (error) {
         console.error('Error:', error);
-        container.innerHTML = '<div class="loading-text">Oops! Something went wrong. Click the button to try again! 🐾</div>';
+        container.innerHTML = `
+            <div class="error-container">
+                <p class="loading-text">Oops! Something went wrong.</p>
+                <button class="button retry-button" onclick="getNewDog()">Try Again 🐾</button>
+            </div>
+        `;
     }
 }
 
-// Load a dog image when the page loads
+// Load initial dog image when page loads
 document.addEventListener('DOMContentLoaded', getNewDog);
